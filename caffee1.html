@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kahve Kaçamağı ☕ | VIP Davet</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              900: '#3b0764',
+            },
+            dark: {
+              bg: '#0a0a0d',
+              card: '#12121a',
+              border: '#20202e',
+              hover: '#1a1a26'
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 3.5s ease-in-out infinite',
+            'glow-pulse': 'glow 3s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%': { opacity: '0.4' },
+              '100%': { opacity: '0.8' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0a0a0d;
+      color: #f3f4f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Ambient Lighting */
+    .bg-glow {
+      background: radial-gradient(circle at 50% 15%, rgba(168, 85, 247, 0.18), transparent 65%),
+                  radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1), transparent 50%);
+    }
+
+    /* Custom Glassmorphism */
+    .glass-card {
+      background: rgba(18, 18, 26, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a0d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #20202e;
+      border-radius: 3px;
+    }
+
+    .glow-shadow {
+      box-shadow: 0 0 35px -8px rgba(168, 85, 247, 0.2);
+    }
+
+    /* Custom styling for date input */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body class="bg-dark-bg text-gray-100 flex flex-col justify-between items-center min-h-screen relative p-4 sm:p-6 bg-glow selection:bg-brand-500 selection:text-white">
+
+  <!-- Ambient Light Orbs -->
+  <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-brand-500/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-glow-pulse"></div>
+  <div class="fixed bottom-10 right-10 w-72 h-72 bg-purple-900/15 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+
+  <!-- Header Brand Tag -->
+  <header class="w-full max-w-lg mx-auto pt-2 pb-2 flex justify-between items-center text-xs tracking-widest text-gray-400 uppercase font-mono">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+      <span class="font-bold text-gray-300">VIP DATE INVITE</span>
+    </div>
+    <span class="text-gray-400" id="current-date"></span>
+  </header>
+
+  <!-- Main Container -->
+  <main class="w-full max-w-lg my-auto py-4">
+    
+    <!-- Progress Indicator Bar -->
+    <div id="progress-container" class="w-full glass-card p-1.5 rounded-2xl mb-6">
+      <div class="flex justify-between items-center text-xs px-3 py-1 text-gray-400 font-medium font-mono">
+        <span id="step-label">Aşama 1 / 5</span>
+        <span id="step-title" class="text-brand-400 font-semibold">Vibe Check</span>
+      </div>
+      <div class="w-full bg-dark-border h-1.5 rounded-full overflow-hidden mt-1">
+        <div id="progress-bar" class="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-400 h-full w-1/5 transition-all duration-500 ease-out"></div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Vibe Check -->
+    <div id="step-1" class="step-content space-y-6">
+      <div class="text-center space-y-2">
+        <span class="inline-block px-3 py-1 bg-brand-500/10 text-brand-400 text-xs font-semibold rounded-full border border-brand-500/20 font-mono">
+          AŞAMA 01 • MOD KONTROLÜ 💭
+        </span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">Bugün modumuz nasıl?</h1>
+        <p class="text-sm text-gray-400">Moralini düzeltmek için nereden başlayacağımızı bilelim.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="selectMood('Biraz Yorgun', '🥱')" class="p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.02] flex items-center gap-4 group">
+          <span class="text-3xl group-hover:scale-110 transition-transform">🥱</span>
+          <div>
+            <div class="font-semibold text-white text-sm">Biraz Yorgun</div>
+            <div class="text-xs text-gray-400 mt-0.5">Sakin ve dertsiz bir mola lazım</div>
+          </div>
+        </button>
+
+        <button onclick="selectMood('Kafam Dolu', '🫠')" class="p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.02] flex items-center gap-4 group">
+          <span class="text-3xl group-hover:scale-110 transition-transform">🫠</span>
+          <div>
+            <div class="font-semibold text-white text-sm">Kafam Dolu</div>
+            <div class="text-xs text-gray-400 mt-0.5">Biraz kafa dağıtmaya ihtiyaç var</div>
+          </div>
+        </button>
+
+        <button onclick="selectMood('Kahveye İhtiyacım Var', '☕')" class="p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.02] flex items-center gap-4 group">
+          <span class="text-3xl group-hover:scale-110 transition-transform">☕</span>
+          <div>
+            <div class="font-semibold text-white text-sm">Kahve Şart Oldu</div>
+            <div class="text-xs text-gray-400 mt-0.5">Enerjim düştü, kafein yüklemesi lazım</div>
+          </div>
+        </button>
+
+        <button onclick="selectMood('Seninle Sohbet Lazım', '✨')" class="p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.02] flex items-center gap-4 group">
+          <span class="text-3xl group-hover:scale-110 transition-transform">✨</span>
+          <div>
+            <div class="font-semibold text-white text-sm">Sohbet Modundayım</div>
+            <div class="text-xs text-gray-400 mt-0.5">Sadece seninle konuşup gülmek istiyorum</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Date Selection (NEW) -->
+    <div id="step-2" class="step-content hidden space-y-6">
+      <div class="text-center space-y-2">
+        <span class="inline-block px-3 py-1 bg-brand-500/10 text-brand-400 text-xs font-semibold rounded-full border border-brand-500/20 font-mono">
+          AŞAMA 02 • ZAMANLAMA 📅
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">Hangi gün kafe kaçamağı yapıyoruz?</h2>
+        <p class="text-sm text-gray-400">Takvimini ayarla, gerisini bana bırak.</p>
+      </div>
+
+      <div class="space-y-3">
+        <button onclick="selectPresetDate('Bugün')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-white">Bugün</div>
+              <div class="text-xs text-gray-400">Hemen şimdi, hiç beklemeden</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+
+        <button onclick="selectPresetDate('Yarın')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400">
+              <i data-lucide="sun" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-white">Yarın</div>
+              <div class="text-xs text-gray-400">Güzel bir günün tatlı kapanışı</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+
+        <button onclick="selectPresetDate('Bu Hafta Sonu')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-white">Bu Hafta Sonu</div>
+              <div class="text-xs text-gray-400">Rahat ve uzun bir hafta sonu kahvesi</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+
+        <!-- Custom Date Selection -->
+        <div class="p-4 glass-card rounded-2xl space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-semibold text-white text-sm">Özel Tarih Seç</div>
+              <div class="text-xs text-gray-400">Tam tarih ve saati sen belirle</div>
+            </div>
+          </div>
+          
+          <div class="flex gap-2 pt-1">
+            <input type="date" id="custom-date-picker" class="bg-dark-card border border-dark-border text-white text-sm rounded-xl p-2.5 w-full focus:outline-none focus:border-brand-500">
+            <button onclick="selectCustomDate()" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs px-4 rounded-xl transition-all flex items-center justify-center">
+              Tamam
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Coffee Preference -->
+    <div id="step-3" class="step-content hidden space-y-6">
+      <div class="text-center space-y-2">
+        <span class="inline-block px-3 py-1 bg-brand-500/10 text-brand-400 text-xs font-semibold rounded-full border border-brand-500/20 font-mono">
+          AŞAMA 03 • MENÜ ☕
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">Kahve modun ne?</h2>
+        <p class="text-sm text-gray-400">Sana ne sipariş ediyoruz?</p>
+      </div>
+
+      <div class="space-y-3">
+        <button onclick="selectCoffee('Buzlu Oat Latte', '🧊')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-2xl">🧊</div>
+          <div class="flex-1">
+            <div class="font-semibold text-white">Buzlu Oat Milk Latte</div>
+            <div class="text-xs text-gray-400">Yumuşak içim, yulaf sütlü ferahlık</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+
+        <button onclick="selectCoffee('Espresso / Amerikano', '☕')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-2xl">☕</div>
+          <div class="flex-1">
+            <div class="font-semibold text-white">Sert Espresso / Flat White</div>
+            <div class="text-xs text-gray-400">Yoğun aroma, anında uyandıran lezzet</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+
+        <button onclick="selectCoffee('Sıcak Çikolata & Tatlı', '🍫')" class="w-full p-4 glass-card hover:border-brand-500/50 rounded-2xl text-left transition-all hover:scale-[1.01] flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-2xl">🍫</div>
+          <div class="flex-1">
+            <div class="font-semibold text-white">Sıcak Çikolata & Tatlı Kaçamağı</div>
+            <div class="text-xs text-gray-400">Sadece tatlı krizini ve moralleri düzeltmeye özel</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: The Runaway Proposal Button -->
+    <div id="step-4" class="step-content hidden space-y-6">
+      <div class="text-center space-y-3">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-3xl animate-float">
+          ☕
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">
+          Günün stresini atmak için benimle kahve içmeye geliyor musun?
+        </h2>
+        <p class="text-sm text-gray-400 max-w-xs mx-auto">Tüm detaylar hazır. Karar senin (veya butonun) 😉</p>
+      </div>
+
+      <!-- Interactive Button Arena -->
+      <div id="button-arena" class="relative w-full h-48 glass-card rounded-3xl p-4 flex items-center justify-center gap-4 overflow-hidden glow-shadow">
+        
+        <!-- YES Button -->
+        <button id="evet-btn" onclick="acceptProposal()" class="bg-gradient-to-r from-brand-600 via-brand-500 to-purple-500 hover:from-brand-500 hover:to-brand-400 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-brand-500/30 transition-all duration-300 transform active:scale-95 z-20 flex items-center gap-2">
+          <span>Evet, Geliyorum! ✨</span>
+        </button>
+
+        <!-- RUNAWAY NO Button -->
+        <button id="hayir-btn" class="bg-dark-card hover:bg-dark-hover text-gray-400 hover:text-white border border-dark-border font-medium py-3 px-6 rounded-full transition-all duration-150 z-10 absolute">
+          <span>Hayır 😜</span>
+        </button>
+      </div>
+
+      <p id="escape-hint" class="text-center text-xs text-gray-500 italic h-4">
+        (İpucu: "Hayır" seçeneği biraz fazla çekingen sanırım...)
+      </p>
+    </div>
+
+    <!-- STEP 5: SUCCESS & DIGITAL TICKET RECEIPT -->
+    <div id="step-success" class="step-content hidden space-y-6">
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-1">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-display">Kahve Randevumuz Onaylandı! 🎉</h2>
+        <p class="text-sm text-gray-400">Harika bir kahve molası seni bekliyor.</p>
+      </div>
+
+      <!-- Digital Ticket Card -->
+      <div id="receipt-card" class="glass-card rounded-3xl p-6 relative overflow-hidden glow-shadow space-y-5 border border-brand-500/20">
+        <!-- Ticket Header -->
+        <div class="flex justify-between items-start border-b border-dark-border pb-4">
+          <div>
+            <div class="text-[10px] font-mono text-brand-400 tracking-widest uppercase">RESERVATION TICKET</div>
+            <div class="text-lg font-bold text-white mt-0.5 font-display">Özel Kahve Kaçamağı</div>
+          </div>
+          <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-semibold rounded-full">
+            ONAYLANDI
+          </span>
+        </div>
+
+        <!-- Selected Options Summary -->
+        <div class="space-y-3.5 text-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Mod Seviyesi:</span>
+            <span id="summary-mood" class="font-semibold text-white"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Tarih:</span>
+            <span id="summary-date" class="font-bold text-brand-400 font-mono"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Seçilen İçecek:</span>
+            <span id="summary-coffee" class="font-semibold text-white"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Mekan:</span>
+            <span class="font-semibold text-gray-200">Sürpriz 3. Nesil Kafe ☕</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Hesap:</span>
+            <span class="font-semibold text-emerald-400 font-mono">Kahveler Benden (0 TL) 😎</span>
+          </div>
+        </div>
+
+        <!-- Dashed Line Divider -->
+        <div class="border-b border-dashed border-dark-border my-2"></div>
+
+        <!-- Bottom Note -->
+        <div class="text-xs text-gray-400 text-center italic">
+          "Günün yorgunluğunu unutturmak ve seni gülümsetmek için sabırsızlanıyorum."
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 space-y-2">
+          <button onclick="sendToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20">
+            <i data-lucide="message-circle" class="w-5 h-5"></i>
+            <span>WhatsApp'tan Bileti Gönder</span>
+          </button>
+          
+          <button onclick="copyTicketSummary()" class="w-full bg-dark-card hover:bg-dark-border text-gray-300 font-medium py-2.5 px-4 rounded-xl border border-dark-border transition-all flex items-center justify-center gap-2 text-xs font-mono">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span id="copy-btn-text">Bilet Detaylarını Kopyala</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-lg mx-auto py-3 text-center text-xs text-gray-600 font-mono">
+    DESIGNED WITH ❤️ FOR A SPECIAL DATE
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // State Variables
+    let currentStep = 1;
+    let selectedMood = '';
+    let selectedDate = '';
+    let selectedCoffee = '';
+    let escapeAttempts = 0;
+
+    // Initialize Lucide Icons & Min Date
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      
+      const now = new Date();
+      const options = { day: 'numeric', month: 'short' };
+      document.getElementById('current-date').innerText = now.toLocaleDateString('tr-TR', options);
+
+      // Set min date for datepicker
+      const dateInput = document.getElementById('custom-date-picker');
+      if (dateInput) {
+        dateInput.min = now.toISOString().split('T')[0];
+      }
+
+      setupRunawayButton();
+    });
+
+    // Step Navigation Function
+    function goToStep(step) {
+      document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+
+      const targetStep = document.getElementById(`step-${step}`);
+      if (targetStep) {
+        targetStep.classList.remove('hidden');
+      }
+
+      currentStep = step;
+
+      // Update Progress Indicator
+      if (step <= 4) {
+        const progressBar = document.getElementById('progress-bar');
+        const stepLabel = document.getElementById('step-label');
+        const stepTitle = document.getElementById('step-title');
+
+        const titles = ["Vibe Check", "Tarih Seçimi", "Kahve Seçimi", "Son Teklif"];
+        progressBar.style.width = `${(step / 4) * 100}%`;
+        stepLabel.innerText = `Aşama ${step} / 4`;
+        stepTitle.innerText = titles[step - 1];
+      } else {
+        document.getElementById('progress-container').classList.add('hidden');
+      }
+    }
+
+    // Step 1: Mood
+    function selectMood(mood, emoji) {
+      selectedMood = `${emoji} ${mood}`;
+      goToStep(2);
+    }
+
+    // Step 2: Date Selection
+    function selectPresetDate(dateText) {
+      selectedDate = dateText;
+      goToStep(3);
+    }
+
+    function selectCustomDate() {
+      const picker = document.getElementById('custom-date-picker');
+      if (!picker.value) {
+        picker.classList.add('border-red-500');
+        return;
+      }
+      
+      const dateObj = new Date(picker.value);
+      const formatted = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'short' });
+      selectedDate = formatted;
+      goToStep(3);
+    }
+
+    // Step 3: Coffee Choice
+    function selectCoffee(coffee, emoji) {
+      selectedCoffee = `${emoji} ${coffee}`;
+      goToStep(4);
+      setTimeout(resetHayirBtn, 100);
+    }
+
+    // Runaway "Hayır" Button Logic
+    function setupRunawayButton() {
+      const hayirBtn = document.getElementById('hayir-btn');
+      const evetBtn = document.getElementById('evet-btn');
+      const arena = document.getElementById('button-arena');
+      const hint = document.getElementById('escape-hint');
+
+      const hints = [
+        "Nereye tıklamaya çalışıyorsun? 😄",
+        "O buton biraz fazla utangaç galiba!",
+        "Boşuna zorlama, kaderine razı ol ☕",
+        "Sanırım sadece 'Evet' butonu stabil çalışıyor!",
+        "Peki peki, 'Evet'e bas gitsin 🎉"
+      ];
+
+      function moveButton(e) {
+        if (e) e.preventDefault();
+        escapeAttempts++;
+
+        const arenaRect = arena.getBoundingClientRect();
+        const btnRect = hayirBtn.getBoundingClientRect();
+
+        const maxX = arenaRect.width - btnRect.width - 20;
+        const maxY = arenaRect.height - btnRect.height - 20;
+
+        const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+        const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+        hayirBtn.style.left = `${randomX}px`;
+        hayirBtn.style.top = `${randomY}px`;
+
+        // YES button grows slightly each time NO dodges
+        const newScale = 1 + Math.min(escapeAttempts * 0.08, 0.45);
+        evetBtn.style.transform = `scale(${newScale})`;
+
+        const hintIndex = Math.min(escapeAttempts - 1, hints.length - 1);
+        hint.innerText = hints[hintIndex];
+      }
+
+      hayirBtn.addEventListener('mouseenter', moveButton);
+      hayirBtn.addEventListener('touchstart', moveButton, { passive: false });
+      hayirBtn.addEventListener('click', moveButton);
+    }
+
+    function resetHayirBtn() {
+      const hayirBtn = document.getElementById('hayir-btn');
+      hayirBtn.style.right = '20px';
+      hayirBtn.style.top = 'auto';
+      hayirBtn.style.left = 'auto';
+    }
+
+    // Proposal Accepted
+    function acceptProposal() {
+      // Confetti Burst
+      confetti({
+        particleCount: 130,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#a855f7', '#c084fc', '#38bdf8', '#4ade80']
+      });
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 60,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 60,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1 }
+        });
+      }, 250);
+
+      // Populate Ticket
+      document.getElementById('summary-mood').innerText = selectedMood || 'Belirtilmedi';
+      document.getElementById('summary-date').innerText = selectedDate || 'En Yakın Zamanda';
+      document.getElementById('summary-coffee').innerText = selectedCoffee || 'Sürpriz Kahve';
+
+      goToStep('success');
+    }
+
+    // WhatsApp Share Link
+    function sendToWhatsApp() {
+      const text = `Sürpriz Kahve Davetini Kabul Ettim! ☕✨%0A%0A` +
+                   `▫️ Modum: ${encodeURIComponent(selectedMood)}%0A` +
+                   `▫️ Tarih: ${encodeURIComponent(selectedDate)}%0A` +
+                   `▫️ Kahve Tercihim: ${encodeURIComponent(selectedCoffee)}%0A%0A` +
+                   `Kahveler senden, sohbet benden! 😎`;
+      
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    // Copy Ticket Details
+    function copyTicketSummary() {
+      const summaryText = `☕ KAHVE BULUŞMASI BİLETİ ☕\n` +
+                          `• Mod: ${selectedMood}\n` +
+                          `• Tarih: ${selectedDate}\n` +
+                          `• İçecek: ${selectedCoffee}\n` +
+                          `• Durum: ONAYLANDI (Kahveler Benden!) 🎉`;
+
+      const tempInput = document.createElement("textarea");
+      tempInput.value = summaryText;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      const btnText = document.getElementById('copy-btn-text');
+      btnText.innerText = 'Kopyalandı! ✨';
+      setTimeout(() => {
+        btnText.innerText = 'Bilet Detaylarını Kopyala';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
